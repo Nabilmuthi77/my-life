@@ -1,0 +1,46 @@
+name: Build My Life Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure Gradle memory and workers
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.parallel=false" >> ~/.gradle/gradle.properties
+          echo "org.gradle.workers.max=1" >> ~/.gradle/gradle.properties
+
+      - name: Build APK with Flet
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.parallel=false -Dorg.gradle.workers.max=1"
+        run: flet build apk --product "My Life" --org "com.mylife" --arch arm64-v8a --build-version "1.0.0" --build-number 1 --yes -vv
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-life-android-apk
+          path: build/apk/**/*.apk
+          if-no-files-found: error

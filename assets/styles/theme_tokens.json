@@ -1,0 +1,48 @@
+{
+  "app_name": "My Life",
+  "tagline": "Progress, not perfection.",
+  "light": {
+    "bg_main": "#F5F7FA",
+    "card_surface": "#F5F7FA",
+    "card_elevated": "#FFFFFF",
+    "pressed_surface": "#E9EEF4",
+    "text_primary": "#17212B",
+    "text_secondary": "#667085",
+    "icon_neutral": "#526171",
+    "accent_primary": "#238D91",
+    "accent_secondary": "#36B3B8",
+    "border_subtle": "#E7ECF2",
+    "shadow_bright": "#FFFFFF",
+    "shadow_dark": "#D9E0E8",
+    "progress_track": "#E4EBF2",
+    "aspects": {
+      "jiwa": { "color": "#238D91", "accent": "#1A6F72" },
+      "raga": { "color": "#E05D5D", "accent": "#B84242" },
+      "emosional": { "color": "#5D7CE0", "accent": "#425CB8" },
+      "prinsipal": { "color": "#E08C38", "accent": "#B86E24" },
+      "finansial": { "color": "#2CA56E", "accent": "#1E7D51" }
+    }
+  },
+  "dark": {
+    "bg_main": "#071A20",
+    "card_surface": "#0B252D",
+    "card_elevated": "#10313A",
+    "pressed_surface": "#06151A",
+    "text_primary": "#F4FAFC",
+    "text_secondary": "#A9C0C8",
+    "icon_neutral": "#A9C0C8",
+    "accent_primary": "#36D6C0",
+    "accent_secondary": "#48A9FF",
+    "border_subtle": "#123A46",
+    "shadow_bright": "#163944",
+    "shadow_dark": "#041116",
+    "progress_track": "#06151A",
+    "aspects": {
+      "jiwa": { "color": "#36D6C0", "accent": "#2BB8A4" },
+      "raga": { "color": "#FF6B81", "accent": "#E04E64" },
+      "emosional": { "color": "#6C9BFF", "accent": "#4E7EE0" },
+      "prinsipal": { "color": "#FFAA5C", "accent": "#E08D40" },
+      "finansial": { "color": "#48E59B", "accent": "#33C27E" }
+    }
+  }
+}
