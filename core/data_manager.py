@@ -88,6 +88,7 @@ class DataManager:
                 }
             ],
             "click_history": [],
+            "diaries": [],
             "theme": "auto",
         }
 
@@ -171,6 +172,21 @@ class DataManager:
                 if isinstance(c, dict):
                     click_history.append(c)
 
+        # Validate diaries
+        diaries: List[Dict[str, Any]] = []
+        raw_diaries = raw.get("diaries")
+        if isinstance(raw_diaries, list):
+            for d in raw_diaries:
+                if isinstance(d, dict) and "content" in d and str(d.get("content", "")).strip():
+                    diaries.append({
+                        "id": str(d.get("id", f"diary_{len(diaries)+1}")),
+                        "date": str(d.get("date", datetime.date.today().isoformat())),
+                        "created_at": str(d.get("created_at", datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))),
+                        "title": str(d.get("title", "")),
+                        "content": str(d.get("content", "")),
+                        "mood": str(d.get("mood", "Tenang")),
+                    })
+
         return {
             "schema_version": schema_version,
             "last_date": last_date,
@@ -178,6 +194,7 @@ class DataManager:
             "progress": progress,
             "history": history,
             "click_history": click_history,
+            "diaries": diaries,
             "theme": theme,
         }
 
@@ -546,3 +563,46 @@ class DataManager:
     def reset_to_defaults(self, current_date_str: Optional[str] = None) -> None:
         """Reset application state to initial reference values."""
         self.reset_to_initial(current_date_str)
+
+    def get_diaries(self) -> List[Dict[str, Any]]:
+        """Return list of diary entries sorted newest first."""
+        diaries = list(self.data.get("diaries", []))
+        diaries.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        return diaries
+
+    def add_diary(
+        self,
+        title: str,
+        content: str,
+        mood: str = "Tenang",
+        custom_date: Optional[str] = None,
+        custom_time: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Add a new diary entry and persist."""
+        import uuid
+        now = datetime.datetime.now()
+        date_val = custom_date.strip() if custom_date and custom_date.strip() else now.strftime("%Y-%m-%d")
+        time_val = custom_time.strip() if custom_time and custom_time.strip() else now.strftime("%H:%M")
+        entry = {
+            "id": f"d_{now.strftime('%Y%m%d%H%M%S')}_{str(uuid.uuid4())[:6]}",
+            "date": date_val,
+            "created_at": f"{date_val} {time_val}",
+            "title": title.strip(),
+            "content": content.strip(),
+            "mood": mood,
+        }
+        if "diaries" not in self.data:
+            self.data["diaries"] = []
+        self.data["diaries"].insert(0, entry)
+        self.save_data()
+        return entry
+
+    def delete_diary(self, diary_id: str) -> bool:
+        """Delete a diary entry by ID and persist."""
+        diaries = self.data.get("diaries", [])
+        initial_len = len(diaries)
+        self.data["diaries"] = [d for d in diaries if d.get("id") != diary_id]
+        if len(self.data["diaries"]) < initial_len:
+            self.save_data()
+            return True
+        return False

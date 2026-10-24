@@ -39,13 +39,13 @@ def build_aspect_detail_view(
         f"{current_score}",
         size=44,
         weight=ft.FontWeight.W_900,
-        color=colors.text_primary,
+        color=icon_color,
     )
     score_denom = ft.Text(
         " / 10",
         size=18,
         weight=ft.FontWeight.W_600,
-        color=colors.text_secondary,
+        color=icon_color,
     )
 
     dots_container = ft.Container(
@@ -53,20 +53,20 @@ def build_aspect_detail_view(
             current_progress=current_progress,
             accent_color=icon_color,
             colors=colors,
-            dot_width=12,
-            dot_height=7,
-            spacing=4,
-            padding_h=10,
-            padding_v=5,
+            dot_width=22,
+            dot_height=8,
+            spacing=0,
+            padding_h=12,
+            padding_v=6,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         ),
-        alignment=ft.Alignment(0, 0),
     )
 
     clicks_label = ft.Text(
         f"{current_progress}/10 klik",
         size=12,
         weight=ft.FontWeight.W_500,
-        color=colors.text_secondary,
+        color=icon_color,
     )
 
     prog_fraction_label = ft.Text(
@@ -95,11 +95,12 @@ def build_aspect_detail_view(
             current_progress=pr,
             accent_color=icon_color,
             colors=colors,
-            dot_width=12,
-            dot_height=7,
-            spacing=4,
-            padding_h=10,
-            padding_v=5,
+            dot_width=22,
+            dot_height=8,
+            spacing=0,
+            padding_h=12,
+            padding_v=6,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
         on_score_change()
 
@@ -118,7 +119,7 @@ def build_aspect_detail_view(
         on_click=lambda e: on_back(),
         size=42,
         icon_size=20,
-        icon_color=colors.text_primary,
+        icon_color=icon_color,
         tooltip="Kembali ke Beranda",
     )
 
@@ -129,7 +130,7 @@ def build_aspect_detail_view(
                 aspect_info.get("name", ""),
                 size=18,
                 weight=ft.FontWeight.W_800,
-                color=colors.text_primary,
+                color=icon_color,
             ),
             NeumorphicBadge(
                 text="DAILY",
@@ -137,6 +138,7 @@ def build_aspect_detail_view(
                 accent_color=icon_color,
                 text_size=11,
                 bold=True,
+                elevated=True,
             ),
         ],
         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -167,7 +169,7 @@ def build_aspect_detail_view(
                 aspect_info.get("description", ""),
                 size=14,
                 weight=ft.FontWeight.W_600,
-                color=colors.text_secondary,
+                color=icon_color,
             ),
             ft.Row(
                 controls=[score_display, score_denom],
@@ -191,7 +193,7 @@ def build_aspect_detail_view(
                         "Progres menuju +1 poin",
                         size=12,
                         weight=ft.FontWeight.W_600,
-                        color=colors.text_primary,
+                        color=icon_color,
                     ),
                     prog_fraction_label,
                 ],
@@ -218,7 +220,7 @@ def build_aspect_detail_view(
         on_click=handle_minus,
         size=60,
         icon_size=26,
-        icon_color=colors.text_primary,
+        icon_color=icon_color,
         tooltip="Kurang 1 poin",
     )
 
@@ -251,7 +253,7 @@ def build_aspect_detail_view(
                 quote,
                 size=12,
                 italic=True,
-                color=colors.text_secondary,
+                color=icon_color,
                 expand=True,
             ),
         ],
@@ -284,7 +286,7 @@ def build_aspect_detail_view(
 
     return ft.Container(
         content=view_column,
-        padding=ft.Padding.only(left=20, right=20, top=36, bottom=16),
+        padding=ft.Padding.only(left=20, right=20, top=52, bottom=16),
         expand=True,
     )
 

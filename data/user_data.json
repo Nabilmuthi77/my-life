@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "last_date": "2026-10-22",
+  "scores": {
+    "jiwa": 3,
+    "raga": 4,
+    "emosional": 2,
+    "prinsipal": 2,
+    "finansial": 0
+  },
+  "progress": {
+    "jiwa": 0,
+    "raga": 0,
+    "emosional": 0,
+    "prinsipal": 0,
+    "finansial": 0
+  },
+  "history": [
+    {
+      "date": "2026-10-22",
+      "jiwa": 3,
+      "raga": 4,
+      "emosional": 2,
+      "prinsipal": 2,
+      "finansial": 0,
+      "total": 11,
+      "average": 2.2
+    }
+  ],
+  "click_history": [],
+  "diaries": [],
+  "theme": "auto"
+}

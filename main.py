@@ -19,6 +19,7 @@ from components.neumorphic import NeumorphicCard, NeumorphicBadge
 from components.aspect_card import AspectCard
 from components.aspect_detail_modal import build_aspect_detail_view
 from components.history_view import HistoryView
+from components.diary_view import DiaryView
 from components.settings_view import SettingsView
 
 
@@ -90,6 +91,173 @@ def main(page: ft.Page):
         active_aspect_detail = None
         render_current_view()
 
+    def navigate_to_tab(idx: int):
+        nonlocal current_tab_index, active_aspect_detail
+        active_aspect_detail = None
+        if current_tab_index != idx:
+            current_tab_index = idx
+            render_current_view()
+
+    exit_dialog: Optional[ft.AlertDialog] = None
+
+    def close_exit_modal(e=None):
+        nonlocal exit_dialog
+        if exit_dialog is not None:
+            if hasattr(page, "pop_dialog"):
+                page.pop_dialog()
+            elif hasattr(page, "close"):
+                page.close(exit_dialog)
+            else:
+                exit_dialog.open = False
+                page.update()
+            exit_dialog = None
+
+    def confirm_exit(e=None):
+        import sys
+        close_exit_modal()
+        try:
+            page.window.destroy()
+        except Exception:
+            pass
+        try:
+            page.window.close()
+        except Exception:
+            pass
+        sys.exit(0)
+
+    def show_exit_modal():
+        nonlocal exit_dialog
+        if exit_dialog is not None:
+            return
+
+        cur_colors = theme_manager.colors
+
+        # Soft neumorphic icon container for exit icon
+        exit_icon_box = ft.Container(
+            content=ft.Icon(
+                ft.Icons.LOGOUT_ROUNDED,
+                size=26,
+                color="#EF4444",
+            ),
+            width=52,
+            height=52,
+            border_radius=16,
+            bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
+            shadow=cur_colors.subtle_shadow(depth=2, blur=6),
+            alignment=ft.Alignment(0, 0),
+        )
+
+        batal_btn = ft.Container(
+            content=ft.Text(
+                "Batal",
+                size=13,
+                weight=ft.FontWeight.W_700,
+                color=cur_colors.text_primary,
+                text_align=ft.TextAlign.CENTER,
+            ),
+            padding=ft.Padding.symmetric(horizontal=18, vertical=10),
+            border_radius=12,
+            bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
+            shadow=cur_colors.subtle_shadow(depth=1, blur=3),
+            alignment=ft.Alignment(0, 0),
+            expand=True,
+            on_click=close_exit_modal,
+        )
+
+        keluar_btn = ft.Container(
+            content=ft.Row(
+                controls=[
+                    ft.Icon(ft.Icons.CHECK_ROUNDED, size=15, color="#EF4444"),
+                    ft.Text(
+                        "Keluar",
+                        size=13,
+                        weight=ft.FontWeight.W_700,
+                        color="#EF4444",
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                spacing=4,
+            ),
+            padding=ft.Padding.symmetric(horizontal=18, vertical=10),
+            border_radius=12,
+            bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
+            shadow=cur_colors.subtle_shadow(depth=1, blur=3),
+            alignment=ft.Alignment(0, 0),
+            expand=True,
+            on_click=confirm_exit,
+        )
+
+        modal_card = NeumorphicCard(
+            content=ft.Column(
+                controls=[
+                    exit_icon_box,
+                    ft.Container(height=6),
+                    ft.Text(
+                        "Keluar Aplikasi",
+                        size=17,
+                        weight=ft.FontWeight.W_800,
+                        color=cur_colors.text_primary,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "Mau keluar dari aplikasi ini?",
+                        size=12.5,
+                        weight=ft.FontWeight.W_500,
+                        color=cur_colors.text_secondary,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Container(height=10),
+                    ft.Row(
+                        controls=[batal_btn, keluar_btn],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,
+                spacing=3,
+                tight=True,
+            ),
+            colors=cur_colors,
+            padding=ft.Padding.only(left=18, right=18, top=16, bottom=14),
+            border_radius=22,
+            margin=ft.Margin.all(0),
+        )
+
+        exit_dialog = ft.AlertDialog(
+            content=ft.Container(
+                content=modal_card,
+                width=300,
+                padding=0,
+            ),
+            content_padding=0,
+            bgcolor="transparent",
+            shape=ft.RoundedRectangleBorder(radius=22),
+            on_dismiss=lambda e: close_exit_modal(),
+        )
+
+        page.show_dialog(exit_dialog)
+        page.update()
+
+    def handle_back_action() -> bool:
+        """Handle back navigation (Android swipe back, physical back button, Escape).
+        Returns True if handled internally (canceling app exit), False if allowed to exit.
+        """
+        if exit_dialog is not None:
+            close_exit_modal()
+            return True
+        if page.pop_dialog() is not None:
+            return True
+        if active_aspect_detail is not None:
+            close_aspect_detail()
+            return True
+        if current_tab_index != 0:
+            navigate_to_tab(0)
+            return True
+        show_exit_modal()
+        return True
+
     # Dynamic UI Renderers
     def build_dashboard_view(colors: ThemeColors) -> ft.Control:
         """Build Home / Dashboard matching modern neumorphism reference."""
@@ -102,7 +270,7 @@ def main(page: ft.Page):
         # 1. Header Card (Wrapping "My Life", Date, Subtitle, and Quick Theme Switcher)
         header_left = ft.Column(
             controls=[
-                ft.Text("My Life", size=22, weight=ft.FontWeight.W_800, color=colors.accent_primary),
+                ft.Text("My Life", size=22, weight=ft.FontWeight.W_800, color=colors.text_primary),
                 ft.Text(date_str_formatted, size=11, weight=ft.FontWeight.W_500, color=colors.text_secondary),
                 ft.Text("Jadi 1% lebih baik setiap hari.", size=11, color=colors.text_secondary),
             ],
@@ -154,7 +322,7 @@ def main(page: ft.Page):
             colors=colors,
             padding=ft.Padding.symmetric(horizontal=16, vertical=12),
             border_radius=20,
-            margin=ft.Margin.only(bottom=10),
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
             elevated=False,
         )
 
@@ -169,7 +337,7 @@ def main(page: ft.Page):
                     "Rata-Rata Hari Ini",
                     size=13,
                     weight=ft.FontWeight.W_700,
-                    color=colors.accent_primary,
+                    color=colors.text_primary if colors.is_dark else colors.accent_primary,
                 ),
                 ft.Row(
                     controls=[
@@ -177,13 +345,13 @@ def main(page: ft.Page):
                             f"{avg_val:.1f}",
                             size=28,
                             weight=ft.FontWeight.W_900,
-                            color=colors.accent_primary,
+                            color=colors.text_primary,
                         ),
                         ft.Text(
                             " / 10",
                             size=13,
                             weight=ft.FontWeight.W_700,
-                            color=colors.accent_primary,
+                            color=colors.text_secondary if colors.is_dark else colors.accent_primary,
                         ),
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.END,
@@ -198,7 +366,7 @@ def main(page: ft.Page):
             colors=colors,
             padding=ft.Padding.symmetric(horizontal=14, vertical=12),
             border_radius=18,
-            margin=ft.Margin.only(right=4),
+            margin=ft.Margin.only(left=18, right=4),
             elevated=False,
         )
 
@@ -209,7 +377,7 @@ def main(page: ft.Page):
                     "Total",
                     size=13,
                     weight=ft.FontWeight.W_700,
-                    color=colors.accent_primary,
+                    color=colors.text_primary if colors.is_dark else colors.accent_primary,
                 ),
                 ft.Row(
                     controls=[
@@ -217,13 +385,13 @@ def main(page: ft.Page):
                             f"{total_val}",
                             size=28,
                             weight=ft.FontWeight.W_900,
-                            color=colors.accent_primary,
+                            color=colors.text_primary,
                         ),
                         ft.Text(
                             " / 50",
                             size=13,
                             weight=ft.FontWeight.W_700,
-                            color=colors.accent_primary,
+                            color=colors.text_secondary if colors.is_dark else colors.accent_primary,
                         ),
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.END,
@@ -238,7 +406,7 @@ def main(page: ft.Page):
             colors=colors,
             padding=ft.Padding.symmetric(horizontal=14, vertical=12),
             border_radius=18,
-            margin=ft.Margin.only(left=4),
+            margin=ft.Margin.only(left=4, right=18),
             elevated=False,
         )
 
@@ -264,7 +432,7 @@ def main(page: ft.Page):
                             "Lima Pilar Hidup",
                             size=13,
                             weight=ft.FontWeight.W_700,
-                            color=colors.accent_primary,
+                            color=colors.text_primary,
                         ),
                     ],
                     spacing=8,
@@ -273,8 +441,10 @@ def main(page: ft.Page):
                 NeumorphicBadge(
                     text="5 Aspek",
                     colors=colors,
+                    accent_color=colors.accent_primary,
                     text_size=10,
                     bold=True,
+                    elevated=True,
                 ),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -286,7 +456,7 @@ def main(page: ft.Page):
             colors=colors,
             padding=ft.Padding.symmetric(horizontal=14, vertical=10),
             border_radius=16,
-            margin=ft.Margin.only(top=4, bottom=10),
+            margin=ft.Margin.only(left=18, right=18, top=4, bottom=10),
             elevated=False,
         )
 
@@ -321,7 +491,7 @@ def main(page: ft.Page):
 
         return ft.Container(
             content=dashboard_column,
-            padding=ft.Padding.only(left=18, right=18, top=36, bottom=14),
+            padding=ft.Padding.only(top=52, bottom=14),
             expand=True,
         )
 
@@ -332,21 +502,22 @@ def main(page: ft.Page):
         tabs = [
             ("Beranda", ft.Icons.HOME_ROUNDED, 0),
             ("Riwayat", ft.Icons.HISTORY_ROUNDED, 1),
-            ("Pengaturan", ft.Icons.SETTINGS_ROUNDED, 2),
+            ("Diary", ft.Icons.AUTO_STORIES_ROUNDED, 2),
+            ("Pengaturan", ft.Icons.SETTINGS_ROUNDED, 3),
         ]
 
         def on_nav_click(idx: int):
-            nonlocal current_tab_index, active_aspect_detail
-            active_aspect_detail = None  # close detail if navigating tabs
-            if current_tab_index != idx:
-                current_tab_index = idx
-                render_current_view()
+            navigate_to_tab(idx)
 
         nav_items = []
         for label, icon, idx in tabs:
             is_active = (current_tab_index == idx) and (active_aspect_detail is None)
             icon_color = colors.accent_primary
-            label_color = colors.accent_primary
+            label_color = (
+                (colors.text_primary if is_active else colors.text_secondary)
+                if colors.is_dark
+                else colors.accent_primary
+            )
 
             # Sleek, minimalist icon + text with clear active prominence
             item_content = ft.Column(
@@ -362,6 +533,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=2,
+                tight=True,
                 opacity=1.0 if is_active else 0.55,
             )
 
@@ -375,7 +547,9 @@ def main(page: ft.Page):
 
             item = ft.Container(
                 content=item_content,
-                padding=ft.Padding.symmetric(horizontal=12, vertical=4),
+                width=74,
+                height=44,
+                alignment=ft.Alignment(0, 0),
                 border_radius=15,
                 bgcolor=bg_color,
                 shadow=shadow,
@@ -388,13 +562,14 @@ def main(page: ft.Page):
         floating_card = ft.Container(
             content=ft.Row(
                 controls=nav_items,
-                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                alignment=ft.MainAxisAlignment.CENTER,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=6,
             ),
             bgcolor=colors.card_surface,
-            height=50,
-            border_radius=25,
-            padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+            height=54,
+            border_radius=27,
+            padding=ft.Padding.symmetric(horizontal=8, vertical=4),
             shadow=colors.floating_nav_shadow(),
             border=None,
         )
@@ -448,6 +623,13 @@ def main(page: ft.Page):
                 on_refresh=render_current_view,
             )
         elif current_tab_index == 2:
+            content_area.content = DiaryView(
+                page=page,
+                colors=colors,
+                data_manager=data_manager,
+                on_change=render_current_view,
+            )
+        elif current_tab_index == 3:
             content_area.content = SettingsView(
                 page=page,
                 theme_manager=theme_manager,
@@ -468,8 +650,8 @@ def main(page: ft.Page):
 
     # Root Layout Construction with True Floating Navigation
     nav_bar_container.bottom = 14
-    nav_bar_container.left = 32
-    nav_bar_container.right = 32
+    nav_bar_container.left = 18
+    nav_bar_container.right = 18
 
     root_layout = ft.Stack(
         controls=[
@@ -487,6 +669,46 @@ def main(page: ft.Page):
     content_area.content = build_dashboard_view(colors)
 
     page.add(root_layout)
+
+    # Configure Android back navigation & swipe-back gesture handling
+    root_view = page.views[0] if page.views else None
+    if root_view:
+        root_view.can_pop = False
+
+        def on_root_view_confirm_pop(e):
+            async def _do_confirm():
+                handled = handle_back_action()
+                if handled:
+                    await e.control.confirm_pop(False)
+                else:
+                    await e.control.confirm_pop(True)
+
+            page.run_task(_do_confirm)
+
+        root_view.on_confirm_pop = on_root_view_confirm_pop
+
+    def on_keyboard(e: ft.KeyboardEvent):
+        if e.key in ("Escape", "Back", "GoBack"):
+            handle_back_action()
+
+    page.on_keyboard_event = on_keyboard
+
+    def on_view_pop(e):
+        handle_back_action()
+
+    page.on_view_pop = on_view_pop
+
+    try:
+        page.window.prevent_close = True
+
+        def on_window_event(e):
+            if e.data == "close":
+                show_exit_modal()
+
+        page.window.on_event = on_window_event
+    except Exception:
+        pass
+
     page.update()
 
 

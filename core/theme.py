@@ -15,31 +15,31 @@ class ThemeColors:
         self.is_dark = is_dark
 
         if is_dark:
-            # Dark Theme: Deep nocturnal blue-green / dark teal
+            # Dark Theme: Deep nocturnal blue-green / dark teal (exact matching user image)
             self.bg_main = "#071A20"
             self.card_surface = "#0A2028"      # Calm, velvety 1-step elevated surface
             self.card_elevated = "#0E2A34"
             self.pressed_surface = "#041217"   # Inset groove
-            self.text_primary = "#2DD4BF"      # Cyan-blue text ('biru' all text)
-            self.text_secondary = "#2DD4BF"    # Cyan-blue text ('biru' all text)
-            self.icon_neutral = "#2DD4BF"
-            self.accent_primary = "#2DD4BF"     # Controlled cyan-teal
-            self.accent_secondary = "#38BDF8"   # Subtle sky accent
+            self.text_primary = "#FFFFFF"      # All primary text is WHITE in dark mode!
+            self.text_secondary = "#CBD5E1"    # Secondary text is soft WHITE!
+            self.icon_neutral = "#0D9488"
+            self.accent_primary = "#0D9488"     # Jiwa Green (calm, cohesive green matching text 2026)
+            self.accent_secondary = "#14B8A6"   # Subtle sky/teal accent
             self.border_subtle = "#0E2833"
             self.shadow_bright = "#0B2129"      # Very subtle soft light (calm, not high/harsh)
             self.shadow_dark = "#030C0F"        # Gentle diffused ambient drop
             self.progress_track = "#041217"
             self.nav_bg = "#0A2028"
         else:
-            # Light Theme: Pure Monochromatic Neumorphism (Soft Light x Shadow x Depth)
+            # Light Theme: Pure Monochromatic Neumorphism (Jiwa Green unified)
             self.bg_main = "#F5F7FA"
             self.card_surface = "#F5F7FA"      # Monochromatic base surface
             self.card_elevated = "#F8FAFC"     # Subtle lift
             self.pressed_surface = "#DFE7F0"   # Inset groove
-            self.text_primary = "#0D9488"      # Crisp ocean cyan-teal ('biru' all text)
-            self.text_secondary = "#0D9488"    # Crisp ocean cyan-teal ('biru' all text)
-            self.icon_neutral = "#0D9488"
-            self.accent_primary = "#0D9488"     # Controlled cool teal
+            self.text_primary = "#0D9488"      # Crisp Jiwa Green
+            self.text_secondary = "#0D9488"    # Crisp Jiwa Green
+            self.icon_neutral = "#0D9488"      # Crisp Jiwa Green
+            self.accent_primary = "#0D9488"     # Crisp Jiwa Green
             self.accent_secondary = "#14B8A6"
             self.border_subtle = "#E2E8F0"
             self.shadow_bright = "#FFFFFF"      # Crisp pure white specular highlight
@@ -48,18 +48,25 @@ class ThemeColors:
             self.nav_bg = "#F5F7FA"
 
     def aspect_color(self, aspect: str) -> str:
-        """Cohesive accent color for aspect cards (unified aesthetic)."""
-        return self.accent_primary
+        """Accent color for aspect cards."""
+        info = ASPECT_DETAILS.get(aspect, {})
+        if not self.is_dark:
+            return info.get("light_color", self.accent_primary)
+        return info.get("dark_color", self.accent_primary)
 
     def get_aspect_icon_color(self, aspect: str) -> str:
-        """Get soft accent icon color for a specific aspect."""
+        """Get accent icon color for a specific aspect (colored in light and dark)."""
         info = ASPECT_DETAILS.get(aspect, {})
-        return info.get("dark_color" if self.is_dark else "light_color", self.accent_primary)
+        if not self.is_dark:
+            return info.get("light_color", self.accent_primary)
+        return info.get("dark_color", self.accent_primary)
 
     def get_aspect_bg_color(self, aspect: str) -> str:
-        """Get soft pastel background emblem color for a specific aspect."""
+        """Get background emblem color for a specific aspect."""
         info = ASPECT_DETAILS.get(aspect, {})
-        return info.get("dark_bg" if self.is_dark else "light_bg", self.pressed_surface)
+        if not self.is_dark:
+            return info.get("light_bg", self.pressed_surface)
+        return info.get("dark_bg", self.pressed_surface)
 
     def raised_shadow(self, depth: Optional[int] = None, blur: Optional[int] = None) -> List[ft.BoxShadow]:
         """Generate soft opposing neumorphic dual shadows."""

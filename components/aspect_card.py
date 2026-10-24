@@ -95,9 +95,9 @@ class AspectCard(ft.Container):
                     current_progress=progress,
                     accent_color=icon_color,
                     colors=colors,
-                    dot_width=6,
+                    dot_width=8,
                     dot_height=6,
-                    spacing=3,
+                    spacing=2.5,
                     padding_h=6,
                     padding_v=3,
                 ),
@@ -123,7 +123,7 @@ class AspectCard(ft.Container):
             on_click=self._handle_minus,
             size=34,
             icon_size=16,
-            icon_color=colors.text_secondary if is_min else colors.text_primary,
+            icon_color=colors.text_secondary if is_min else icon_color,
             tooltip="Kurang 1 poin" if not is_min else "Skor sudah 0",
             disabled=is_min,
         )
@@ -162,7 +162,7 @@ class AspectCard(ft.Container):
             colors=colors,
             padding=ft.Padding.symmetric(horizontal=12, vertical=10),
             border_radius=18,
-            margin=ft.Margin.only(bottom=9),
+            margin=ft.Margin.only(left=18, right=18, bottom=9),
             on_click=self._open_detail,
         )
 

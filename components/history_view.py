@@ -45,7 +45,7 @@ class HistoryView(ft.Container):
 
         super().__init__(
             content=self._build_layout(),
-            padding=ft.Padding.only(left=18, right=18, top=36, bottom=0),
+            padding=ft.Padding.only(top=52, bottom=0),
             expand=True,
         )
 
@@ -59,7 +59,7 @@ class HistoryView(ft.Container):
         def make_tab_btn(label: str, icon_name: str, idx: int):
             is_active = self.active_subtab == idx
             bg = (self.colors.card_elevated if self.colors.is_dark else "#FFFFFF") if is_active else "transparent"
-            text_col = self.colors.accent_primary
+            text_col = (self.colors.text_primary if is_active else self.colors.text_secondary) if self.colors.is_dark else self.colors.accent_primary
             shadow = self.colors.subtle_shadow(depth=1, blur=4) if is_active else []
 
             return ft.Container(
@@ -92,6 +92,7 @@ class HistoryView(ft.Container):
             bgcolor=self.colors.pressed_surface,
             border_radius=15,
             padding=3,
+            margin=ft.Margin.only(left=18, right=18),
             shadow=self.colors.pressed_shadow(),
         )
 
@@ -121,36 +122,88 @@ class HistoryView(ft.Container):
         else:
             avg_7d = 0.0
 
-        header_section = ft.Column(
+        header_card = NeumorphicCard(
+            content=ft.Row(
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Riwayat 7 Hari",
+                                size=17,
+                                weight=ft.FontWeight.W_800,
+                                color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
+                            ),
+                            ft.Text(
+                                f"Rata-rata skor: {avg_7d:.1f} / 10",
+                                size=12,
+                                weight=ft.FontWeight.W_500,
+                                color=self.colors.text_secondary,
+                            ),
+                        ],
+                        spacing=2,
+                    ),
+                    NeumorphicBadge(
+                        text=f"{avg_7d:.1f} / 10",
+                        colors=self.colors,
+                        text_size=10,
+                        bold=True,
+                        elevated=True,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            colors=self.colors,
+            padding=ft.Padding.symmetric(horizontal=16, vertical=12),
+            border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, top=4, bottom=10),
+            elevated=False,
+        )
+
+        summary_heading_content = ft.Row(
             controls=[
-                ft.Text(
-                    "Riwayat 7 Hari",
-                    size=22,
-                    weight=ft.FontWeight.W_800,
-                    color=self.colors.accent_primary,
+                ft.Row(
+                    controls=[
+                        ft.Icon(
+                            ft.Icons.CALENDAR_MONTH_ROUNDED,
+                            size=15,
+                            color=self.colors.accent_primary,
+                        ),
+                        ft.Text(
+                            "Ringkasan per hari",
+                            size=13,
+                            weight=ft.FontWeight.W_700,
+                            color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
+                        ),
+                    ],
+                    spacing=8,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                ft.Text(
-                    f"Rata-rata skor: {avg_7d:.1f} / 10",
-                    size=13,
-                    weight=ft.FontWeight.W_500,
-                    color=self.colors.text_secondary,
+                NeumorphicBadge(
+                    text="7 Hari",
+                    colors=self.colors,
+                    text_size=10,
+                    bold=True,
+                    elevated=True,
                 ),
             ],
-            spacing=2,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+
+        summary_heading_card = NeumorphicCard(
+            content=summary_heading_content,
+            colors=self.colors,
+            padding=ft.Padding.symmetric(horizontal=14, vertical=10),
+            border_radius=16,
+            margin=ft.Margin.only(left=18, right=18, top=0, bottom=10),
+            elevated=False,
         )
 
         controls = [
-            header_section,
-            ft.Container(height=8),
+            header_card,
             self._build_chart_card(),
-            ft.Container(height=12),
-            ft.Text(
-                "Ringkasan per hari",
-                size=15,
-                weight=ft.FontWeight.W_700,
-                color=self.colors.accent_primary,
-            ),
-            ft.Container(height=2),
+            summary_heading_card,
             self._build_daily_summary_card(),
             ft.Container(height=80),  # Safe bottom padding for floating nav bar
         ]
@@ -163,27 +216,46 @@ class HistoryView(ft.Container):
         )
 
     def _build_activities_tab(self) -> ft.Control:
-        header_section = ft.Column(
-            controls=[
-                ft.Text(
-                    "Aktivitas Terbaru",
-                    size=22,
-                    weight=ft.FontWeight.W_800,
-                    color=self.colors.accent_primary,
-                ),
-                ft.Text(
-                    "Setiap klik adalah langkah kecil menuju perbaikan.",
-                    size=13,
-                    weight=ft.FontWeight.W_500,
-                    color=self.colors.text_secondary,
-                ),
-            ],
-            spacing=2,
+        header_card = NeumorphicCard(
+            content=ft.Row(
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Aktivitas Terbaru",
+                                size=17,
+                                weight=ft.FontWeight.W_800,
+                                color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
+                            ),
+                            ft.Text(
+                                "Langkah kecil menuju perbaikan.",
+                                size=12,
+                                weight=ft.FontWeight.W_500,
+                                color=self.colors.text_secondary,
+                            ),
+                        ],
+                        spacing=2,
+                    ),
+                    NeumorphicBadge(
+                        text="Aktivitas",
+                        colors=self.colors,
+                        text_size=10,
+                        bold=True,
+                        elevated=True,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            colors=self.colors,
+            padding=ft.Padding.symmetric(horizontal=16, vertical=12),
+            border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, top=4, bottom=10),
+            elevated=False,
         )
 
         controls = [
-            header_section,
-            ft.Container(height=10),
+            header_card,
             self._build_activity_feed_card(),
             ft.Container(height=80),  # Safe bottom padding for floating nav bar
         ]
@@ -205,6 +277,7 @@ class HistoryView(ft.Container):
                     alignment=ft.Alignment(0, 0),
                 ),
                 colors=self.colors,
+                margin=ft.Margin.only(left=18, right=18, bottom=10),
             )
 
         chart_height = 105
@@ -287,6 +360,7 @@ class HistoryView(ft.Container):
             colors=self.colors,
             padding=14,
             border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
             elevated=True,
         )
 
@@ -329,6 +403,7 @@ class HistoryView(ft.Container):
             colors=self.colors,
             padding=14,
             border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
         )
 
     def _build_activity_feed_card(self) -> ft.Control:
@@ -346,6 +421,7 @@ class HistoryView(ft.Container):
                     alignment=ft.Alignment(0, 0),
                 ),
                 colors=self.colors,
+                margin=ft.Margin.only(left=18, right=18, bottom=10),
             )
 
         activity_rows: List[ft.Control] = []
@@ -425,4 +501,5 @@ class HistoryView(ft.Container):
             colors=self.colors,
             padding=14,
             border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
         )

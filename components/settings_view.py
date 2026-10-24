@@ -32,25 +32,76 @@ class SettingsView(ft.Container):
 
         super().__init__(
             content=self._build_content(),
-            padding=ft.Padding.only(left=18, right=18, top=36, bottom=90),
+            padding=ft.Padding.only(top=52, bottom=0),
             expand=True,
         )
 
     def _build_content(self) -> ft.Control:
         pref = self.theme_manager.preference
 
+        # 1. Header Card: Pengaturan
+        header_card = NeumorphicCard(
+            content=ft.Row(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Container(
+                                content=ft.Icon(
+                                    ft.Icons.SETTINGS_ROUNDED,
+                                    size=20,
+                                    color=self.colors.accent_primary,
+                                ),
+                                width=40,
+                                height=40,
+                                border_radius=12,
+                                bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
+                                shadow=self.colors.subtle_shadow(depth=2, blur=5),
+                                alignment=ft.Alignment(0, 0),
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text(
+                                        "Pengaturan",
+                                        size=18,
+                                        weight=ft.FontWeight.W_800,
+                                        color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
+                                    ),
+                                    ft.Text(
+                                        "Preferensi & sistem aplikasi",
+                                        size=12,
+                                        weight=ft.FontWeight.W_500,
+                                        color=self.colors.text_secondary,
+                                    ),
+                                ],
+                                spacing=2,
+                            ),
+                        ],
+                        spacing=12,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    NeumorphicBadge(text="Sistem", colors=self.colors, text_size=10, bold=True, elevated=True),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            colors=self.colors,
+            padding=ft.Padding.symmetric(horizontal=16, vertical=12),
+            border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
+        )
+
         def make_theme_option(label: str, value: str):
             is_active = pref == value
             radio_icon = ft.Icons.RADIO_BUTTON_CHECKED_ROUNDED if is_active else ft.Icons.RADIO_BUTTON_OFF_ROUNDED
             radio_color = self.colors.accent_primary if is_active else self.colors.text_secondary
 
-            return NeumorphicCard(
+            return ft.Container(
                 content=ft.Row(
                     controls=[
                         ft.Icon(radio_icon, size=20, color=radio_color),
                         ft.Text(
                             label,
-                            size=14,
+                            size=13.5,
                             weight=ft.FontWeight.W_700 if is_active else ft.FontWeight.W_500,
                             color=self.colors.text_primary,
                         ),
@@ -58,12 +109,69 @@ class SettingsView(ft.Container):
                     spacing=12,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                colors=self.colors,
-                padding=ft.Padding.symmetric(horizontal=14, vertical=12),
-                border_radius=16,
-                margin=ft.Margin.only(bottom=8),
+                padding=ft.Padding.symmetric(horizontal=14, vertical=11),
+                border_radius=14,
+                bgcolor=(
+                    ("#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated)
+                    if is_active
+                    else ft.Colors.TRANSPARENT
+                ),
+                shadow=self.colors.subtle_shadow(depth=2, blur=5) if is_active else None,
                 on_click=lambda e: self.on_theme_changed(value),
+                animate=ft.Animation(150, ft.AnimationCurve.EASE_IN_OUT),
             )
+
+        # 2. Unified Section Card: Tema Aplikasi (Header + Options inside 1 NeumorphicCard)
+        theme_section_card = NeumorphicCard(
+            content=ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Container(
+                                content=ft.Icon(
+                                    ft.Icons.PALETTE_ROUNDED,
+                                    size=18,
+                                    color=self.colors.accent_primary,
+                                ),
+                                width=36,
+                                height=36,
+                                border_radius=18,
+                                bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
+                                shadow=self.colors.subtle_shadow(depth=2, blur=5),
+                                alignment=ft.Alignment(0, 0),
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text(
+                                        "Tema Aplikasi",
+                                        size=13,
+                                        weight=ft.FontWeight.W_700,
+                                        color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
+                                    ),
+                                    ft.Text(
+                                        "Pilih tampilan aplikasi sesuai preferensimu.",
+                                        size=11,
+                                        color=self.colors.text_secondary,
+                                    ),
+                                ],
+                                spacing=1,
+                            ),
+                        ],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Container(height=4),
+                    make_theme_option("Putih", "light"),
+                    make_theme_option("Gelap", "dark"),
+                    make_theme_option("Auto", "auto"),
+                ],
+                spacing=4,
+            ),
+            colors=self.colors,
+            padding=ft.Padding.symmetric(horizontal=14, vertical=14),
+            border_radius=18,
+            margin=ft.Margin.only(left=18, right=18, bottom=10),
+        )
 
         def make_action_card(icon_name: str, title: str, on_click: Callable):
             return NeumorphicCard(
@@ -74,14 +182,15 @@ class SettingsView(ft.Container):
                             width=34,
                             height=34,
                             border_radius=17,
-                            bgcolor=self.colors.pressed_surface,
+                            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
+                            shadow=self.colors.subtle_shadow(depth=2, blur=5),
                             alignment=ft.Alignment(0, 0),
                         ),
                         ft.Text(
                             title,
                             size=13,
                             weight=ft.FontWeight.W_700,
-                            color=self.colors.accent_primary,
+                            color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
                             expand=True,
                         ),
                         ft.Icon(ft.Icons.CHEVRON_RIGHT_ROUNDED, size=18, color=self.colors.text_secondary),
@@ -92,68 +201,9 @@ class SettingsView(ft.Container):
                 colors=self.colors,
                 padding=ft.Padding.symmetric(horizontal=14, vertical=10),
                 border_radius=16,
-                margin=ft.Margin.only(bottom=8),
+                margin=ft.Margin.only(left=18, right=18, bottom=8),
                 on_click=on_click,
             )
-
-        # 1. Header Card: Pengaturan
-        header_card = NeumorphicCard(
-            content=ft.Row(
-                controls=[
-                    ft.Row(
-                        controls=[
-                            ft.Icon(ft.Icons.SETTINGS_ROUNDED, size=20, color=self.colors.accent_primary),
-                            ft.Text(
-                                "Pengaturan",
-                                size=18,
-                                weight=ft.FontWeight.W_800,
-                                color=self.colors.accent_primary,
-                            ),
-                        ],
-                        spacing=8,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                    NeumorphicBadge(text="Sistem", colors=self.colors, text_size=10, bold=True),
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            colors=self.colors,
-            padding=ft.Padding.symmetric(horizontal=16, vertical=12),
-            border_radius=18,
-            margin=ft.Margin.only(bottom=10),
-        )
-
-        # 2. Section Heading Card: Tema Aplikasi
-        theme_header_card = NeumorphicCard(
-            content=ft.Row(
-                controls=[
-                    ft.Icon(ft.Icons.PALETTE_ROUNDED, size=18, color=self.colors.accent_primary),
-                    ft.Column(
-                        controls=[
-                            ft.Text(
-                                "Tema Aplikasi",
-                                size=13,
-                                weight=ft.FontWeight.W_700,
-                                color=self.colors.accent_primary,
-                            ),
-                            ft.Text(
-                                "Pilih tampilan aplikasi sesuai preferensimu.",
-                                size=11,
-                                color=self.colors.text_secondary,
-                            ),
-                        ],
-                        spacing=1,
-                    ),
-                ],
-                spacing=8,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            colors=self.colors,
-            padding=ft.Padding.symmetric(horizontal=14, vertical=10),
-            border_radius=16,
-            margin=ft.Margin.only(bottom=8),
-        )
 
         # 3. Footer Brand Card (Lebar & Tulisan ke bawah sesuai permintaan)
         footer_content = ft.Container(
@@ -168,19 +218,19 @@ class SettingsView(ft.Container):
                         "My Life",
                         size=14,
                         weight=ft.FontWeight.W_800,
-                        color=self.colors.accent_primary,
+                        color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
                     ),
                     ft.Text(
                         "Versi 1.0.0",
                         size=11,
                         weight=ft.FontWeight.W_600,
-                        color=self.colors.accent_primary,
+                        color=self.colors.text_secondary if self.colors.is_dark else self.colors.accent_primary,
                     ),
                     ft.Text(
                         "Progress, not perfection",
                         size=10,
                         italic=True,
-                        color=self.colors.accent_primary,
+                        color=self.colors.text_secondary if self.colors.is_dark else self.colors.accent_primary,
                     ),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -195,15 +245,12 @@ class SettingsView(ft.Container):
             colors=self.colors,
             padding=ft.Padding.symmetric(horizontal=16, vertical=16),
             border_radius=18,
-            margin=ft.Margin.only(top=14, bottom=8),
+            margin=ft.Margin.only(left=18, right=18, top=14, bottom=8),
         )
 
         controls = [
             header_card,
-            theme_header_card,
-            make_theme_option("Putih", "light"),
-            make_theme_option("Gelap", "dark"),
-            make_theme_option("Auto", "auto"),
+            theme_section_card,
             ft.Container(height=6),
             make_action_card("INFO_OUTLINE_ROUNDED", "Tentang Aplikasi", self._show_about_modal),
             make_action_card("BACKUP_ROUNDED", "Backup Data", self._show_backup_modal),
