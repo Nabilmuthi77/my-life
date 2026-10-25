@@ -210,6 +210,12 @@ class TestBusinessRules(unittest.TestCase):
         self.dm.reset_to_defaults()
         self.assertEqual(self.dm.data["scores"]["jiwa"], 3)
 
+    def test_17_status_bar_spacer_clearance(self):
+        """TEST 17: Status bar clearance spacer is adequate (> 44dp) for edge-to-edge mobile screens."""
+        from core.constants import STATUS_BAR_SPACER_HEIGHT
+        self.assertGreaterEqual(STATUS_BAR_SPACER_HEIGHT, 48)
+
 
 if __name__ == "__main__":
     unittest.main()
+

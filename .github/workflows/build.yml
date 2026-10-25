@@ -45,7 +45,7 @@ jobs:
           --product "My Life"
           --org "com.mylife"
           --arch arm64-v8a
-          --build-version "1.0.4"
+          --build-version "1.0.5"
           --build-number ${{ github.run_number }}
           --android-signing-key-store "${{ github.workspace }}/.github/keystore/release.jks"
           --android-signing-key-store-password "mylifekey2026"

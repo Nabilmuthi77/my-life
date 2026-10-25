@@ -11,7 +11,7 @@ Matches Screen 3 of reference design:
 
 from typing import Callable, Dict, Any, List, Optional
 import flet as ft
-from core.constants import ASPECT_DETAILS, MAX_SCORE, MIN_SCORE
+from core.constants import ASPECT_DETAILS, MAX_SCORE, MIN_SCORE, STATUS_BAR_SPACER_HEIGHT
 from core.theme import ThemeColors
 from components.neumorphic import NeumorphicCard, NeumorphicButton, NeumorphicProgressDots, NeumorphicBadge
 
@@ -271,7 +271,7 @@ def build_aspect_detail_view(
 
     view_column = ft.Column(
         controls=[
-            ft.Container(height=28),  # Status bar clearance spacer inside scroll view
+            ft.Container(height=STATUS_BAR_SPACER_HEIGHT),  # Status bar clearance spacer inside scroll view
             top_header,
             ft.Container(height=10),
             center_hero,

@@ -7,7 +7,7 @@ Provides dedicated tabs matching reference design:
 
 from typing import List, Dict, Any, Optional
 import flet as ft
-from core.constants import ASPECT_KEYS, ASPECT_DETAILS
+from core.constants import ASPECT_KEYS, ASPECT_DETAILS, STATUS_BAR_SPACER_HEIGHT
 from core.theme import ThemeColors
 from components.neumorphic import NeumorphicCard, NeumorphicBadge
 
@@ -148,7 +148,7 @@ class HistoryView(ft.Container):
 
         return ft.Column(
             controls=[
-                ft.Container(height=28),  # Status bar clearance spacer
+                ft.Container(height=STATUS_BAR_SPACER_HEIGHT),  # Status bar clearance spacer
                 segment_pill,
                 ft.Container(height=8),
                 active_content,

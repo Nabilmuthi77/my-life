@@ -12,6 +12,7 @@ from core.constants import (
     ASPECT_KEYS,
     ASPECT_DETAILS,
     REFERENCE_DATE,
+    STATUS_BAR_SPACER_HEIGHT,
 )
 from core.data_manager import DataManager
 from core.theme import ThemeManager, ThemeColors
@@ -505,7 +506,7 @@ def main(page: ft.Page):
 
         dashboard_column = ft.Column(
             controls=[
-                ft.Container(height=28),  # Status bar clearance spacer inside scroll view
+                ft.Container(height=STATUS_BAR_SPACER_HEIGHT),  # Status bar clearance spacer inside scroll view
                 header_card,
                 ft.Container(height=4),
                 summary_row,

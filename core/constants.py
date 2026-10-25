@@ -84,3 +84,7 @@ MAX_SCORE = 10
 MIN_SCORE = 0
 CLICKS_PER_POINT = 10
 MAX_CLICK_HISTORY = 500
+
+# Status bar clearance spacer height for Android / Mobile edge-to-edge screens
+STATUS_BAR_SPACER_HEIGHT = 52
+

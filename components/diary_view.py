@@ -11,6 +11,7 @@ import calendar
 import math
 from typing import Callable, Any, List, Optional
 import flet as ft
+from core.constants import STATUS_BAR_SPACER_HEIGHT
 from core.theme import ThemeColors
 from components.neumorphic import NeumorphicCard, NeumorphicBadge, NeumorphicButton
 
@@ -1705,7 +1706,7 @@ class DiaryView(ft.Container):
                 diary_cards.append(item_card)
 
         controls = [
-            ft.Container(height=28),  # Status bar clearance spacer inside scroll view
+            ft.Container(height=STATUS_BAR_SPACER_HEIGHT),  # Status bar clearance spacer inside scroll view
             header_card,
             write_card,
             history_heading_card,
