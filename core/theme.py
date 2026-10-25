@@ -44,7 +44,7 @@ class ThemeColors:
             self.border_subtle = "#D1DAE5"     # Crisp delicate rim border
             self.shadow_bright = "#FFFFFF"      # Crisp pure white specular highlight
             self.shadow_dark = "#C8D2DE"        # Soft diffused ambient shadow
-            self.progress_track = "#FFFFFF"
+            self.progress_track = "#E2E8F0"     # Soft recessed groove track for progress bar
             self.nav_bg = "#FFFFFF"
 
     def aspect_color(self, aspect: str) -> str:

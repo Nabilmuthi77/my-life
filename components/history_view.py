@@ -27,6 +27,49 @@ def format_short_date(date_str: str) -> str:
     return date_str
 
 
+def format_activity_ts(ts: str) -> str:
+    """Format timestamp into 'DD Mmm · HH:MM' or 'DD Mmm' in Indonesian."""
+    if not ts:
+        return ""
+    months = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]
+    try:
+        if "T" in ts:
+            date_part, time_part = ts.split("T", 1)
+            parts = date_part.split("-")
+            if len(parts) == 3:
+                day = int(parts[2])
+                month_idx = int(parts[1])
+                month_name = months[month_idx] if 1 <= month_idx <= 12 else str(month_idx)
+                time_hm = time_part[:5]
+                if time_hm == "00:00":
+                    return f"{day} {month_name}"
+                return f"{day} {month_name} · {time_hm}"
+        elif len(ts) >= 10 and "-" in ts:
+            parts = ts[:10].split("-")
+            if len(parts) == 3:
+                day = int(parts[2])
+                month_idx = int(parts[1])
+                month_name = months[month_idx] if 1 <= month_idx <= 12 else str(month_idx)
+                return f"{day} {month_name}"
+    except Exception:
+        pass
+    return ts[:16] if len(ts) >= 16 else ts
+
+
+def extract_clean_activity_message(msg: str) -> str:
+    """Extract clean concise description from activity message."""
+    if not msg:
+        return "+1 progres"
+    clean = msg
+    for sep in [" — ", " - ", " – "]:
+        if sep in clean:
+            parts = clean.split(sep, 1)
+            if parts[1].strip():
+                clean = parts[1].strip()
+            break
+    return clean
+
+
 class HistoryView(ft.Container):
     """View displaying 7-day chart, daily breakdown, and recent activities."""
 
@@ -45,14 +88,18 @@ class HistoryView(ft.Container):
 
         super().__init__(
             content=self._build_layout(),
-            padding=ft.Padding.only(top=52, bottom=0),
+            padding=0,
+            bgcolor=colors.bg_main,
             expand=True,
         )
 
     def _switch_subtab(self, idx: int):
         self.active_subtab = idx
         self.content = self._build_layout()
-        self.update()
+        try:
+            self.update()
+        except RuntimeError:
+            pass
 
     def _build_layout(self) -> ft.Control:
         # 1. Header Segmented Control
@@ -101,6 +148,7 @@ class HistoryView(ft.Container):
 
         return ft.Column(
             controls=[
+                ft.Container(height=28),  # Status bar clearance spacer
                 segment_pill,
                 ft.Container(height=8),
                 active_content,
@@ -431,18 +479,40 @@ class HistoryView(ft.Container):
 
         for idx, act in enumerate(recent_acts):
             asp = act.get("aspect", "jiwa")
-            asp_info = ASPECT_DETAILS.get(asp, {})
-            icon_name = asp_info.get("icon_name", "SPA_ROUNDED")
-            icon_color = self.colors.get_aspect_icon_color(asp)
-            icon_bg = self.colors.get_aspect_bg_color(asp)
+            is_decay = (asp == "all" or act.get("type") == "daily_decay")
+
+            if is_decay:
+                title_text = "Pergantian Hari"
+                icon_name = "UPDATE_ROUNDED"
+                icon_color = "#F59E0B" if not self.colors.is_dark else "#FBBF24"
+                icon_bg = "#FEF3C7" if not self.colors.is_dark else "#2E2310"
+            else:
+                asp_info = ASPECT_DETAILS.get(asp, {})
+                title_text = asp_info.get("name", asp.capitalize())
+                icon_name = asp_info.get("icon_name", "SPA_ROUNDED")
+                icon_color = self.colors.get_aspect_icon_color(asp)
+                icon_bg = self.colors.get_aspect_bg_color(asp)
 
             ts = act.get("timestamp", "")
-            time_part = ts[11:16] if len(ts) >= 16 else ""
-            date_part = ts[8:10] if len(ts) >= 10 else ""
-            formatted_ts = f"{date_part} Okt · {time_part}" if date_part else ts[:16]
+            formatted_ts = format_activity_ts(ts)
 
             msg = act.get("message", "+1 progres")
-            score_after = act.get("score_after", 0)
+            clean_desc = extract_clean_activity_message(msg)
+
+            # Score badge logic: prioritize 'score' then fallback to 'score_after'
+            score_val = act.get("score")
+            if score_val is None:
+                score_val = act.get("score_after")
+
+            if score_val is not None:
+                badge_text = f"{score_val}/10"
+                badge_color = self.colors.text_primary
+            elif is_decay:
+                badge_text = "-1 Poin"
+                badge_color = "#F43F5E" if not self.colors.is_dark else "#FB7185"
+            else:
+                badge_text = ""
+                badge_color = self.colors.text_secondary
 
             emblem = ft.Container(
                 content=ft.Icon(
@@ -450,56 +520,91 @@ class HistoryView(ft.Container):
                     size=16,
                     color=icon_color,
                 ),
-                width=34,
-                height=34,
-                border_radius=17,
+                width=36,
+                height=36,
+                border_radius=18,
                 bgcolor=icon_bg,
                 alignment=ft.Alignment(0, 0),
             )
 
+            # Line 1: Title (left) & Score / Result (right)
+            line1_controls = [
+                ft.Text(
+                    title_text,
+                    size=13,
+                    weight=ft.FontWeight.W_700,
+                    color=self.colors.text_primary,
+                    expand=True,
+                    overflow=ft.TextOverflow.ELLIPSIS,
+                    max_lines=1,
+                ),
+            ]
+            if badge_text:
+                line1_controls.append(
+                    ft.Text(
+                        badge_text,
+                        size=12,
+                        weight=ft.FontWeight.W_700,
+                        color=badge_color,
+                    )
+                )
+
+            # Line 2: Action description (left) & Timestamp (right)
+            line2_controls = [
+                ft.Text(
+                    clean_desc,
+                    size=11,
+                    color=self.colors.text_secondary,
+                    expand=True,
+                    overflow=ft.TextOverflow.ELLIPSIS,
+                    max_lines=1,
+                ),
+            ]
+            if formatted_ts:
+                line2_controls.append(
+                    ft.Text(
+                        formatted_ts,
+                        size=10,
+                        color=self.colors.text_secondary,
+                    )
+                )
+
             info_col = ft.Column(
                 controls=[
-                    ft.Text(
-                        asp_info.get("name", asp.capitalize()),
-                        size=13,
-                        weight=ft.FontWeight.W_700,
-                        color=self.colors.text_primary,
+                    ft.Row(
+                        controls=line1_controls,
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     ft.Row(
-                        controls=[
-                            ft.Text(msg, size=11, color=self.colors.text_secondary),
-                            ft.Text(f"· {formatted_ts}", size=10, color=self.colors.text_secondary),
-                        ],
-                        spacing=4,
+                        controls=line2_controls,
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                 ],
-                spacing=1,
+                spacing=3,
                 expand=True,
             )
 
-            score_badge = ft.Text(
-                f"{score_after}/10",
-                size=12,
-                weight=ft.FontWeight.W_700,
-                color=self.colors.text_primary,
-            )
-
-            row = ft.Row(
-                controls=[
-                    emblem,
-                    info_col,
-                    score_badge,
-                ],
-                spacing=10,
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            row = ft.Container(
+                content=ft.Row(
+                    controls=[
+                        emblem,
+                        info_col,
+                    ],
+                    spacing=12,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                padding=ft.Padding.symmetric(vertical=3),
             )
             activity_rows.append(row)
             if idx < len(recent_acts) - 1:
-                activity_rows.append(ft.Divider(height=1, thickness=0.8, color=self.colors.border_subtle))
+                activity_rows.append(
+                    ft.Divider(height=1, thickness=0.8, color=self.colors.border_subtle)
+                )
 
         return NeumorphicCard(
-            content=ft.Column(controls=activity_rows, spacing=8),
+            content=ft.Column(controls=activity_rows, spacing=6),
             colors=self.colors,
             padding=14,
             border_radius=18,

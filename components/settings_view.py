@@ -2,7 +2,7 @@
 Matches Screen 6 ('Pengaturan') of reference design:
 - Header and 'Tema Aplikasi' with Putih, Gelap, Auto radio options
 - Menu action cards: Tentang Aplikasi, Backup Data, Reset Data
-- Footer brand with logo, 'My Life', and 'Versi 1.0.0'
+- Footer brand with logo, 'My Life', and 'Versi 1.0.4'
 """
 
 import os
@@ -32,7 +32,8 @@ class SettingsView(ft.Container):
 
         super().__init__(
             content=self._build_content(),
-            padding=ft.Padding.only(top=52, bottom=0),
+            padding=0,
+            bgcolor=self.colors.bg_main,
             expand=True,
         )
 
@@ -221,7 +222,7 @@ class SettingsView(ft.Container):
                         color=self.colors.text_primary if self.colors.is_dark else self.colors.accent_primary,
                     ),
                     ft.Text(
-                        "Versi 1.0.0",
+                        "Versi 1.0.4",
                         size=11,
                         weight=ft.FontWeight.W_600,
                         color=self.colors.text_secondary if self.colors.is_dark else self.colors.accent_primary,
@@ -249,6 +250,7 @@ class SettingsView(ft.Container):
         )
 
         controls = [
+            ft.Container(height=28),  # Status bar clearance spacer inside scroll view
             header_card,
             theme_section_card,
             ft.Container(height=6),

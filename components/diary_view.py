@@ -60,7 +60,8 @@ class DiaryView(ft.Container):
 
         super().__init__(
             content=self._build_content(),
-            padding=ft.Padding.only(top=52, bottom=0),
+            padding=0,
+            bgcolor=colors.bg_main,
             expand=True,
         )
 
@@ -221,10 +222,20 @@ class DiaryView(ft.Container):
         modal_controls.append(reading_box)
         modal_controls.append(ft.Container(height=8))
 
+        del_btn_dialog = NeumorphicButton(
+            icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
+            colors=self.colors,
+            size=42,
+            icon_size=18,
+            icon_color="#EF4444",
+            tooltip="Hapus catatan",
+            on_click=lambda e: (self.app_page.pop_dialog(), self._delete_diary(d_id)),
+        )
+
         done_btn = NeumorphicCard(
             content=ft.Row(
                 controls=[
-                    ft.Icon(ft.Icons.CHECK_ROUNDED, size=15, color=self.colors.accent_primary),
+                    ft.Icon(ft.Icons.CHECK_ROUNDED, size=16, color=self.colors.accent_primary),
                     ft.Text(
                         "Selesai Membaca",
                         size=12,
@@ -236,25 +247,14 @@ class DiaryView(ft.Container):
                 spacing=6,
             ),
             colors=self.colors,
-            padding=ft.Padding.symmetric(horizontal=16, vertical=10),
-            border_radius=12,
+            height=42,
+            padding=ft.Padding.symmetric(horizontal=16),
+            border_radius=21,
+            margin=0,
+            alignment=ft.Alignment(0, 0),
             on_click=lambda e: self.app_page.pop_dialog(),
             elevated=True,
             expand=True,
-        )
-
-        del_btn_dialog = ft.Container(
-            content=ft.Icon(
-                ft.Icons.DELETE_OUTLINE_ROUNDED,
-                size=18,
-                color="#EF4444",
-            ),
-            padding=8,
-            border_radius=10,
-            bgcolor=self.colors.card_surface,
-            shadow=self.colors.subtle_shadow(depth=1, blur=3),
-            tooltip="Hapus catatan",
-            on_click=lambda e: (self.app_page.pop_dialog(), self._delete_diary(d_id)),
         )
 
         action_row = ft.Row(
@@ -1586,15 +1586,14 @@ class DiaryView(ft.Container):
                 date_str = format_diary_date(d_date) if d_date else ""
                 full_time = f"{date_str} · {time_str}" if time_str else date_str
 
-                # Delete button (red trash icon)
-                del_btn = ft.Container(
-                    content=ft.Icon(
-                        ft.Icons.DELETE_OUTLINE_ROUNDED,
-                        size=16,
-                        color="#EF4444",
-                    ),
-                    padding=4,
-                    border_radius=8,
+                # Delete button (round tactile red trash button)
+                del_btn = NeumorphicButton(
+                    icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
+                    colors=self.colors,
+                    size=30,
+                    icon_size=15,
+                    icon_color="#EF4444",
+                    bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
                     on_click=lambda e, target_id=d_id: self._delete_diary(target_id),
                     tooltip="Hapus catatan",
                 )
@@ -1706,6 +1705,7 @@ class DiaryView(ft.Container):
                 diary_cards.append(item_card)
 
         controls = [
+            ft.Container(height=28),  # Status bar clearance spacer inside scroll view
             header_card,
             write_card,
             history_heading_card,

@@ -271,6 +271,7 @@ def build_aspect_detail_view(
 
     view_column = ft.Column(
         controls=[
+            ft.Container(height=28),  # Status bar clearance spacer inside scroll view
             top_header,
             ft.Container(height=10),
             center_hero,
@@ -286,7 +287,8 @@ def build_aspect_detail_view(
 
     return ft.Container(
         content=view_column,
-        padding=ft.Padding.only(left=20, right=20, top=52, bottom=16),
+        padding=ft.Padding.only(left=20, right=20, top=0, bottom=16),
+        bgcolor=colors.bg_main,
         expand=True,
     )
 

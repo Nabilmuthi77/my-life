@@ -42,10 +42,12 @@ def main(page: ft.Page):
     page.spacing = 0
 
     # Configure window sizing for desktop preview (Mobile 9:19 viewport ratio)
-    page.window.width = 412
-    page.window.height = 840
-    page.window.min_width = 360
-    page.window.min_height = 640
+    if page.platform not in (ft.PagePlatform.ANDROID, ft.PagePlatform.IOS):
+        page.window.width = 412
+        page.window.height = 840
+        page.window.min_width = 360
+        page.window.min_height = 640
+        page.window.wait_until_ready_to_show = True
 
     # Custom font from assets and invisible scrollbar configuration
     page.fonts = {
@@ -60,8 +62,28 @@ def main(page: ft.Page):
         track_color="transparent",
         track_border_color="transparent",
     )
-    page.theme = ft.Theme(font_family="ComicRelief", scrollbar_theme=scrollbar_cfg)
-    page.dark_theme = ft.Theme(font_family="ComicRelief", scrollbar_theme=scrollbar_cfg)
+    system_overlay_light = ft.SystemOverlayStyle(
+        status_bar_color="transparent",
+        status_bar_icon_brightness=ft.Brightness.DARK,
+        system_navigation_bar_color="transparent",
+        system_navigation_bar_icon_brightness=ft.Brightness.DARK,
+    )
+    system_overlay_dark = ft.SystemOverlayStyle(
+        status_bar_color="transparent",
+        status_bar_icon_brightness=ft.Brightness.LIGHT,
+        system_navigation_bar_color="transparent",
+        system_navigation_bar_icon_brightness=ft.Brightness.LIGHT,
+    )
+    page.theme = ft.Theme(
+        font_family="ComicRelief",
+        scrollbar_theme=scrollbar_cfg,
+        system_overlay_style=system_overlay_light,
+    )
+    page.dark_theme = ft.Theme(
+        font_family="ComicRelief",
+        scrollbar_theme=scrollbar_cfg,
+        system_overlay_style=system_overlay_dark,
+    )
 
     # 1. Initialize Data Manager and apply daily decay on startup
     data_manager = DataManager()
@@ -72,6 +94,11 @@ def main(page: ft.Page):
     initial_pref = data_manager.data.get("theme", "auto")
     theme_manager = ThemeManager(initial_preference=initial_pref)
     theme_manager.update_platform_brightness(page.platform_brightness)
+
+    # Set early background & theme mode to prevent startup color flash
+    colors = theme_manager.colors
+    page.theme_mode = ft.ThemeMode.DARK if theme_manager.is_dark else ft.ThemeMode.LIGHT
+    page.bgcolor = colors.bg_main
 
     # App Navigation State
     current_tab_index = 0
@@ -478,6 +505,7 @@ def main(page: ft.Page):
 
         dashboard_column = ft.Column(
             controls=[
+                ft.Container(height=28),  # Status bar clearance spacer inside scroll view
                 header_card,
                 ft.Container(height=4),
                 summary_row,
@@ -492,7 +520,8 @@ def main(page: ft.Page):
 
         return ft.Container(
             content=dashboard_column,
-            padding=ft.Padding.only(top=52, bottom=14),
+            padding=ft.Padding.only(top=0, bottom=14),
+            bgcolor=colors.bg_main,
             expand=True,
         )
 
@@ -699,18 +728,23 @@ def main(page: ft.Page):
 
     page.on_view_pop = on_view_pop
 
-    try:
-        page.window.prevent_close = True
+    if page.platform not in (ft.PagePlatform.ANDROID, ft.PagePlatform.IOS):
+        try:
+            page.window.prevent_close = True
 
-        def on_window_event(e):
-            if e.data == "close":
-                show_exit_modal()
+            def on_window_event(e):
+                if e.data == "close":
+                    show_exit_modal()
 
-        page.window.on_event = on_window_event
-    except Exception:
-        pass
+            page.window.on_event = on_window_event
+        except Exception:
+            pass
 
     page.update()
+
+    if page.platform not in (ft.PagePlatform.ANDROID, ft.PagePlatform.IOS):
+        page.window.visible = True
+        page.window.update()
 
 
 if __name__ == "__main__":

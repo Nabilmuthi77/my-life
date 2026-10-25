@@ -20,12 +20,17 @@ class NeumorphicCard(ft.Container):
         colors: ThemeColors,
         padding: Any = 16,
         border_radius: int = 20,
-        margin: Optional[ft.Margin] = None,
+        margin: Optional[Any] = None,
         on_click: Optional[Callable] = None,
         elevated: bool = False,
         shadow: Optional[List[ft.BoxShadow]] = None,
         expand: Optional[bool] = None,
         bgcolor: Optional[str] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        alignment: Optional[Any] = None,
+        tooltip: Optional[str] = None,
+        **kwargs,
     ):
         if bgcolor is not None:
             surface = bgcolor
@@ -33,17 +38,30 @@ class NeumorphicCard(ft.Container):
             surface = "#FFFFFF"
         else:
             surface = colors.card_elevated if elevated else colors.card_surface
+
+        if isinstance(margin, (int, float)):
+            card_margin = ft.Margin.all(margin)
+        elif margin is not None:
+            card_margin = margin
+        else:
+            card_margin = ft.Margin.only(bottom=10)
+
         super().__init__(
             content=content,
             bgcolor=surface,
             border_radius=border_radius,
             padding=padding,
-            margin=margin if margin is not None else ft.Margin.only(bottom=10),
+            margin=card_margin,
             shadow=shadow if shadow is not None else colors.raised_shadow(),
             border=None,
             animate=ft.Animation(160, ft.AnimationCurve.EASE_OUT),
             on_click=on_click,
             expand=expand,
+            width=width,
+            height=height,
+            alignment=alignment,
+            tooltip=tooltip,
+            **kwargs,
         )
 
 
