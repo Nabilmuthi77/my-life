@@ -55,7 +55,7 @@ class SettingsView(ft.Container):
                                 height=40,
                                 border_radius=12,
                                 bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
-                                shadow=self.colors.subtle_shadow(depth=2, blur=5),
+                                shadow=self.colors.subtle_shadow(depth=1, blur=2),
                                 alignment=ft.Alignment(0, 0),
                             ),
                             ft.Column(
@@ -116,7 +116,7 @@ class SettingsView(ft.Container):
                     if is_active
                     else ft.Colors.TRANSPARENT
                 ),
-                shadow=self.colors.subtle_shadow(depth=2, blur=5) if is_active else None,
+                shadow=self.colors.subtle_shadow(depth=1, blur=2) if is_active else None,
                 on_click=lambda e: self.on_theme_changed(value),
                 animate=ft.Animation(150, ft.AnimationCurve.EASE_IN_OUT),
             )
@@ -137,7 +137,7 @@ class SettingsView(ft.Container):
                                 height=36,
                                 border_radius=18,
                                 bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
-                                shadow=self.colors.subtle_shadow(depth=2, blur=5),
+                                shadow=self.colors.subtle_shadow(depth=1, blur=2),
                                 alignment=ft.Alignment(0, 0),
                             ),
                             ft.Column(
@@ -183,7 +183,7 @@ class SettingsView(ft.Container):
                             height=34,
                             border_radius=17,
                             bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
-                            shadow=self.colors.subtle_shadow(depth=2, blur=5),
+                            shadow=self.colors.subtle_shadow(depth=1, blur=2),
                             alignment=ft.Alignment(0, 0),
                         ),
                         ft.Text(
@@ -322,7 +322,8 @@ class SettingsView(ft.Container):
                             multiline=True,
                             max_lines=6,
                             text_size=10,
-                            bgcolor=self.colors.pressed_surface,
+                            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
+                            border_color=self.colors.border_subtle if not self.colors.is_dark else None,
                         ),
                     ],
                     spacing=6,

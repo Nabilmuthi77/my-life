@@ -3,7 +3,7 @@
   "tagline": "Progress, not perfection.",
   "light": {
     "bg_main": "#F5F7FA",
-    "card_surface": "#F5F7FA",
+    "card_surface": "#FFFFFF",
     "card_elevated": "#FFFFFF",
     "pressed_surface": "#E9EEF4",
     "text_primary": "#17212B",

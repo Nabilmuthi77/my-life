@@ -25,8 +25,14 @@ class NeumorphicCard(ft.Container):
         elevated: bool = False,
         shadow: Optional[List[ft.BoxShadow]] = None,
         expand: Optional[bool] = None,
+        bgcolor: Optional[str] = None,
     ):
-        surface = colors.card_elevated if elevated else colors.card_surface
+        if bgcolor is not None:
+            surface = bgcolor
+        elif not colors.is_dark:
+            surface = "#FFFFFF"
+        else:
+            surface = colors.card_elevated if elevated else colors.card_surface
         super().__init__(
             content=content,
             bgcolor=surface,
@@ -145,13 +151,17 @@ class NeumorphicProgressDots(ft.Container):
             spacing=0 if alignment == ft.MainAxisAlignment.SPACE_BETWEEN else spacing,
         )
 
+        track_bg = "#FFFFFF" if not colors.is_dark else colors.pressed_surface
+        track_border = None
+        track_shadow = colors.subtle_shadow(depth=1, blur=3) if not colors.is_dark else colors.pressed_shadow()
+
         super().__init__(
             content=track_row,
-            bgcolor=colors.progress_track,
+            bgcolor=track_bg,
             border_radius=11,
             padding=ft.Padding.symmetric(horizontal=padding_h, vertical=padding_v),
-            shadow=colors.pressed_shadow(),
-            border=None,
+            shadow=track_shadow,
+            border=track_border,
         )
 
 

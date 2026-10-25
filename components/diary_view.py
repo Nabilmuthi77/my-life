@@ -210,11 +210,12 @@ class DiaryView(ft.Container):
 
         reading_box = ft.Container(
             content=scrollable_text,
-            bgcolor=self.colors.pressed_surface,
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
             border_radius=16,
             padding=14,
             height=240,
-            shadow=self.colors.pressed_shadow(),
+            border=None,
+            shadow=self.colors.subtle_shadow(depth=1, blur=3) if not self.colors.is_dark else self.colors.pressed_shadow(),
         )
 
         modal_controls.append(reading_box)
@@ -282,6 +283,7 @@ class DiaryView(ft.Container):
                 padding=0,
             ),
             content_padding=0,
+            inset_padding=ft.Padding.symmetric(horizontal=12, vertical=20),
             bgcolor="transparent",
             shape=ft.RoundedRectangleBorder(radius=22),
         )
@@ -299,23 +301,30 @@ class DiaryView(ft.Container):
         view_month = self.selected_date.month
         current_view = "calendar"
         year_base = (view_year // 12) * 12
+        cal_wrap_width = 350
+        cal_inner_width = 318
 
         calendar_container = ft.Container(
-            width=316,
-            padding=0,
+            width=cal_inner_width,
+            padding=ft.Padding.symmetric(horizontal=3),
         )
 
         calendar_card = NeumorphicCard(
             content=calendar_container,
             colors=self.colors,
-            padding=ft.Padding.only(left=12, right=12, top=12, bottom=12),
+            padding=ft.Padding.symmetric(horizontal=16, vertical=14),
             border_radius=22,
             margin=0,
         )
 
         dialog = ft.AlertDialog(
-            content=calendar_card,
+            content=ft.Container(
+                content=calendar_card,
+                width=cal_wrap_width,
+                padding=0,
+            ),
             content_padding=0,
+            inset_padding=ft.Padding.symmetric(horizontal=12, vertical=20),
             bgcolor="transparent",
             shape=ft.RoundedRectangleBorder(radius=22),
         )
@@ -621,7 +630,7 @@ class DiaryView(ft.Container):
                     colors=self.colors,
                     padding=ft.Padding.symmetric(horizontal=10, vertical=7),
                     border_radius=16,
-                    margin=ft.Margin.only(bottom=6),
+                    margin=ft.Margin.only(bottom=8),
                     elevated=False,
                 )
 
@@ -773,11 +782,11 @@ class DiaryView(ft.Container):
                 calendar_container.content = ft.Column(
                     controls=[
                         header_card,
-                        ft.Container(height=4),
+                        ft.Container(height=10),
                         days_header_row,
                         ft.Container(height=3),
                         grid_column,
-                        ft.Container(height=8),
+                        ft.Container(height=18),
                         today_btn,
                     ],
                     spacing=0,
@@ -822,8 +831,13 @@ class DiaryView(ft.Container):
         )
 
         dialog = ft.AlertDialog(
-            content=time_card,
+            content=ft.Container(
+                content=time_card,
+                width=318,
+                padding=0,
+            ),
             content_padding=0,
+            inset_padding=ft.Padding.symmetric(horizontal=12, vertical=20),
             bgcolor="transparent",
             shape=ft.RoundedRectangleBorder(radius=22),
         )
@@ -995,8 +1009,8 @@ class DiaryView(ft.Container):
                 height=50,
                 border_radius=12,
                 padding=3,
-                bgcolor=self.colors.pressed_surface,
-                shadow=self.colors.pressed_shadow(),
+                bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
+                shadow=self.colors.subtle_shadow(depth=1, blur=3) if not self.colors.is_dark else self.colors.pressed_shadow(),
                 alignment=ft.Alignment(0, 0),
             )
 
@@ -1010,16 +1024,17 @@ class DiaryView(ft.Container):
             )
 
             # 3. Circular Dial (Jam Bulat Neumorphic)
-            cx, cy = 100, 100
-            R = 76
+            dial_size = 186
+            cx, cy = dial_size / 2, dial_size / 2
+            R = 72  # Memberikan jarak renggang ~5px dari batas luar dial (wrap)
             dial_controls: List[ft.Control] = [
                 ft.Container(
                     width=8,
                     height=8,
                     border_radius=4,
                     bgcolor=self.colors.accent_primary,
-                    left=96,
-                    top=96,
+                    left=cx - 4,
+                    top=cy - 4,
                 )
             ]
 
@@ -1114,17 +1129,17 @@ class DiaryView(ft.Container):
 
             dial_stack = ft.Stack(
                 controls=dial_controls,
-                width=200,
-                height=200,
+                width=dial_size,
+                height=dial_size,
             )
 
             dial_disc = ft.Container(
                 content=dial_stack,
-                width=200,
-                height=200,
-                border_radius=100,
-                bgcolor=self.colors.pressed_surface,
-                shadow=self.colors.pressed_shadow(),
+                width=dial_size,
+                height=dial_size,
+                border_radius=dial_size // 2,
+                bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_surface,
+                shadow=self.colors.subtle_shadow(depth=2, blur=6) if not self.colors.is_dark else self.colors.pressed_shadow(),
                 alignment=ft.Alignment(0, 0),
             )
 
@@ -1279,12 +1294,12 @@ class DiaryView(ft.Container):
                     m,
                     size=10.5,
                     weight=ft.FontWeight.W_700 if is_active else ft.FontWeight.W_500,
-                    color=(self.colors.text_primary if is_active else self.colors.text_secondary) if self.colors.is_dark else self.colors.accent_primary,
+                    color="#FFFFFF" if is_active and not self.colors.is_dark else ((self.colors.text_primary if is_active else self.colors.text_secondary) if self.colors.is_dark else self.colors.accent_primary),
                     no_wrap=True,
                 ),
-                padding=ft.Padding.symmetric(horizontal=6, vertical=5),
+                padding=ft.Padding.symmetric(horizontal=6, vertical=4),
                 border_radius=11,
-                bgcolor=self.colors.card_elevated if is_active else "transparent",
+                bgcolor=self.colors.accent_primary if is_active and not self.colors.is_dark else (self.colors.card_elevated if is_active else "transparent"),
                 shadow=self.colors.subtle_shadow(depth=1, blur=3) if is_active else [],
                 on_click=lambda e, mood_val=m: self._select_mood(mood_val),
                 animate=ft.Animation(160, ft.AnimationCurve.EASE_OUT),
@@ -1297,10 +1312,11 @@ class DiaryView(ft.Container):
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
-            bgcolor=self.colors.pressed_surface,
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
             border_radius=14,
-            padding=ft.Padding.symmetric(horizontal=5, vertical=3),
-            shadow=self.colors.pressed_shadow(),
+            padding=ft.Padding.symmetric(horizontal=3, vertical=3),
+            border=None,
+            shadow=self.colors.subtle_shadow(depth=1, blur=2) if not self.colors.is_dark else self.colors.pressed_shadow(),
         )
 
         # 3. Writing Card Fields
@@ -1327,7 +1343,7 @@ class DiaryView(ft.Container):
             bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_surface,
             border_radius=14,
             padding=ft.Padding.symmetric(horizontal=12, vertical=10),
-            shadow=self.colors.subtle_shadow(depth=2, blur=4),
+            shadow=self.colors.subtle_shadow(depth=1, blur=2),
             expand=True,
             on_click=lambda e: self._show_custom_calendar_dialog(date_display_text),
             tooltip="Pilih tanggal catatan",
@@ -1355,7 +1371,7 @@ class DiaryView(ft.Container):
             bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_surface,
             border_radius=14,
             padding=ft.Padding.symmetric(horizontal=8, vertical=10),
-            shadow=self.colors.subtle_shadow(depth=2, blur=4),
+            shadow=self.colors.subtle_shadow(depth=1, blur=2),
             width=96,
             on_click=lambda e: self._show_custom_time_dialog(time_display_text),
             tooltip="Pilih jam catatan (jam bulat)",
@@ -1379,9 +1395,10 @@ class DiaryView(ft.Container):
 
         title_container = ft.Container(
             content=title_field,
-            bgcolor=self.colors.pressed_surface,
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
             border_radius=14,
-            shadow=self.colors.pressed_shadow(),
+            border=None,
+            shadow=self.colors.subtle_shadow(depth=1, blur=3) if not self.colors.is_dark else self.colors.pressed_shadow(),
         )
 
         content_field = ft.TextField(
@@ -1399,9 +1416,10 @@ class DiaryView(ft.Container):
 
         content_container = ft.Container(
             content=content_field,
-            bgcolor=self.colors.pressed_surface,
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
             border_radius=14,
-            shadow=self.colors.pressed_shadow(),
+            border=None,
+            shadow=self.colors.subtle_shadow(depth=1, blur=3) if not self.colors.is_dark else self.colors.pressed_shadow(),
         )
 
         save_btn_content = ft.Row(
@@ -1418,17 +1436,19 @@ class DiaryView(ft.Container):
             spacing=6,
         )
 
-        save_btn = NeumorphicCard(
+        save_btn = ft.Container(
             content=save_btn_content,
-            colors=self.colors,
-            padding=ft.Padding.symmetric(horizontal=16, vertical=10),
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.card_elevated,
             border_radius=14,
+            padding=ft.Padding.symmetric(horizontal=16, vertical=10),
             margin=ft.Margin.only(top=4, bottom=0),
+            shadow=self.colors.subtle_shadow(depth=1, blur=2),
+            alignment=ft.Alignment(0, 0),
             on_click=lambda e: self._save_diary(
                 title_field.value or "",
                 content_field.value or "",
             ),
-            elevated=True,
+            animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
         )
 
         write_card_content = ft.Column(
@@ -1459,9 +1479,9 @@ class DiaryView(ft.Container):
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                ft.Container(height=4),
+                ft.Container(height=2),
                 mood_pill,
-                ft.Container(height=4),
+                ft.Container(height=2),
                 date_time_row,
                 ft.Container(height=2),
                 title_container,

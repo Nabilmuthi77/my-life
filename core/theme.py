@@ -33,19 +33,19 @@ class ThemeColors:
         else:
             # Light Theme: Pure Monochromatic Neumorphism (Jiwa Green unified)
             self.bg_main = "#F5F7FA"
-            self.card_surface = "#F5F7FA"      # Monochromatic base surface
-            self.card_elevated = "#F8FAFC"     # Subtle lift
-            self.pressed_surface = "#DFE7F0"   # Inset groove
+            self.card_surface = "#FFFFFF"      # Crisp White card surface
+            self.card_elevated = "#FFFFFF"     # Crisp White elevated card surface
+            self.pressed_surface = "#EAEFF4"   # Soft recessed groove fill (matching "Name" pill)
             self.text_primary = "#0D9488"      # Crisp Jiwa Green
             self.text_secondary = "#0D9488"    # Crisp Jiwa Green
             self.icon_neutral = "#0D9488"      # Crisp Jiwa Green
             self.accent_primary = "#0D9488"     # Crisp Jiwa Green
             self.accent_secondary = "#14B8A6"
-            self.border_subtle = "#E2E8F0"
+            self.border_subtle = "#D1DAE5"     # Crisp delicate rim border
             self.shadow_bright = "#FFFFFF"      # Crisp pure white specular highlight
-            self.shadow_dark = "#CCD6E2"        # Soft diffused ambient shadow
-            self.progress_track = "#E6ECF3"
-            self.nav_bg = "#F5F7FA"
+            self.shadow_dark = "#C8D2DE"        # Soft diffused ambient shadow
+            self.progress_track = "#FFFFFF"
+            self.nav_bg = "#FFFFFF"
 
     def aspect_color(self, aspect: str) -> str:
         """Accent color for aspect cards."""
@@ -125,8 +125,10 @@ class ThemeColors:
                 ),
             ]
         else:
-            d = depth if depth is not None else 3
-            b = blur if blur is not None else 8
+            d = depth if depth is not None else 1
+            b = blur if blur is not None else 2
+            # Ultra soft, clean ambient shadow without dark murky borders
+            ambient_color = "#E2E8F0"
             return [
                 ft.BoxShadow(
                     spread_radius=0,
@@ -137,29 +139,60 @@ class ThemeColors:
                 ft.BoxShadow(
                     spread_radius=0,
                     blur_radius=b,
-                    color=self.shadow_dark,
+                    color=ambient_color,
                     offset=ft.Offset(d, d),
                 ),
             ]
 
-    def pressed_shadow(self, depth: Optional[int] = None, blur: Optional[int] = None) -> List[ft.BoxShadow]:
-        """Soft dual outside shadow (outside shadow as requested)."""
-        d = depth if depth is not None else (1 if self.is_dark else 2)
-        b = blur if blur is not None else 4
-        return [
-            ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=b,
-                color=self.shadow_bright,
-                offset=ft.Offset(-d, -d),
-            ),
-            ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=b + 1,
-                color=self.shadow_dark,
-                offset=ft.Offset(d, d),
-            ),
-        ]
+    def pressed_shadow(
+        self,
+        depth: Optional[int] = None,
+        blur: Optional[int] = None,
+        spread: Optional[int] = None,
+    ) -> List[ft.BoxShadow]:
+        """Subtle dual bevel shadow for inset / recessed controls (matching the crisp 'Name' pill spec)."""
+        d = depth if depth is not None else 1
+        b = blur if blur is not None else 3
+        s = spread if spread is not None else 0
+        if self.is_dark:
+            return [
+                ft.BoxShadow(
+                    spread_radius=s,
+                    blur_radius=b,
+                    color=self.shadow_bright,
+                    offset=ft.Offset(-d, -d),
+                ),
+                ft.BoxShadow(
+                    spread_radius=s,
+                    blur_radius=b + 1,
+                    color=self.shadow_dark,
+                    offset=ft.Offset(d, d),
+                ),
+            ]
+        else:
+            return [
+                ft.BoxShadow(
+                    spread_radius=s,
+                    blur_radius=b,
+                    color="#FFFFFF",
+                    offset=ft.Offset(-d, -d),
+                ),
+                ft.BoxShadow(
+                    spread_radius=s,
+                    blur_radius=b + 1,
+                    color="#C8D2DE",
+                    offset=ft.Offset(d, d),
+                ),
+            ]
+
+    def inner_shadow(
+        self,
+        depth: Optional[int] = None,
+        blur: Optional[int] = None,
+        spread: Optional[int] = None,
+    ) -> List[ft.BoxShadow]:
+        """Alias to pressed_shadow for clean, bug-free rendering across Flutter platforms."""
+        return self.pressed_shadow(depth=depth, blur=blur, spread=spread)
 
     def floating_nav_shadow(self) -> List[ft.BoxShadow]:
         """Soft, compact floating shadow for minimalist floating bottom navigation capsule."""

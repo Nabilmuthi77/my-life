@@ -58,9 +58,9 @@ class HistoryView(ft.Container):
         # 1. Header Segmented Control
         def make_tab_btn(label: str, icon_name: str, idx: int):
             is_active = self.active_subtab == idx
-            bg = (self.colors.card_elevated if self.colors.is_dark else "#FFFFFF") if is_active else "transparent"
-            text_col = (self.colors.text_primary if is_active else self.colors.text_secondary) if self.colors.is_dark else self.colors.accent_primary
-            shadow = self.colors.subtle_shadow(depth=1, blur=4) if is_active else []
+            bg = (self.colors.card_elevated if self.colors.is_dark else self.colors.accent_primary) if is_active else "transparent"
+            text_col = (self.colors.text_primary if self.colors.is_dark else "#FFFFFF") if is_active else self.colors.text_secondary
+            shadow = self.colors.subtle_shadow(depth=1, blur=3) if is_active else []
 
             return ft.Container(
                 content=ft.Row(
@@ -75,7 +75,7 @@ class HistoryView(ft.Container):
                 border_radius=12,
                 bgcolor=bg,
                 shadow=shadow,
-                opacity=1.0 if is_active else 0.6,
+                opacity=1.0 if is_active else 0.7,
                 expand=True,
                 animate=ft.Animation(160, ft.AnimationCurve.EASE_OUT),
                 on_click=lambda e, i=idx: self._switch_subtab(i),
@@ -89,11 +89,12 @@ class HistoryView(ft.Container):
                 ],
                 spacing=4,
             ),
-            bgcolor=self.colors.pressed_surface,
+            bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.pressed_surface,
             border_radius=15,
             padding=3,
             margin=ft.Margin.only(left=18, right=18),
-            shadow=self.colors.pressed_shadow(),
+            border=None,
+            shadow=self.colors.subtle_shadow(depth=1, blur=3) if not self.colors.is_dark else self.colors.pressed_shadow(),
         )
 
         active_content = self._build_active_subtab_content()
@@ -308,15 +309,15 @@ class HistoryView(ft.Container):
                         ft.Container(
                             height=fill_h,
                             bgcolor=bar_color,
-                            border_radius=ft.BorderRadius(top_left=5, top_right=5, bottom_left=2, bottom_right=2),
+                            border_radius=ft.BorderRadius(top_left=6, top_right=6, bottom_left=2, bottom_right=2),
                             shadow=[
                                 ft.BoxShadow(
                                     spread_radius=0,
-                                    blur_radius=4,
-                                    color=self.colors.accent_primary if self.colors.is_dark else "#C8D3E0",
+                                    blur_radius=3,
+                                    color=self.colors.accent_primary,
                                     offset=ft.Offset(0, -1),
                                 )
-                            ],
+                            ] if self.colors.is_dark else None,
                             animate=ft.Animation(240, ft.AnimationCurve.EASE_OUT),
                         )
                     ],
@@ -324,9 +325,10 @@ class HistoryView(ft.Container):
                 ),
                 width=18,
                 height=chart_height,
-                bgcolor=self.colors.progress_track,
-                border_radius=ft.BorderRadius(top_left=6, top_right=6, bottom_left=3, bottom_right=3),
-                shadow=self.colors.pressed_shadow(),
+                bgcolor="#FFFFFF" if not self.colors.is_dark else self.colors.progress_track,
+                border_radius=9,
+                shadow=self.colors.subtle_shadow(depth=1, blur=2) if not self.colors.is_dark else self.colors.pressed_shadow(),
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                 border=None,
             )
 

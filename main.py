@@ -113,17 +113,18 @@ def main(page: ft.Page):
             exit_dialog = None
 
     def confirm_exit(e=None):
-        import sys
-        close_exit_modal()
+        import os, threading
         try:
-            page.window.destroy()
+            page.window.prevent_close = False
+            page.window.visible = False
+            page.window.update()
+            if hasattr(page.window, "destroy"):
+                page.run_task(page.window.destroy)
+            elif hasattr(page.window, "close"):
+                page.run_task(page.window.close)
         except Exception:
             pass
-        try:
-            page.window.close()
-        except Exception:
-            pass
-        sys.exit(0)
+        threading.Timer(0.05, lambda: os._exit(0)).start()
 
     def show_exit_modal():
         nonlocal exit_dialog
@@ -143,7 +144,7 @@ def main(page: ft.Page):
             height=52,
             border_radius=16,
             bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
-            shadow=cur_colors.subtle_shadow(depth=2, blur=6),
+            shadow=cur_colors.subtle_shadow(depth=1, blur=3),
             alignment=ft.Alignment(0, 0),
         )
 
@@ -158,7 +159,7 @@ def main(page: ft.Page):
             padding=ft.Padding.symmetric(horizontal=18, vertical=10),
             border_radius=12,
             bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
-            shadow=cur_colors.subtle_shadow(depth=1, blur=3),
+            shadow=cur_colors.subtle_shadow(depth=1, blur=2),
             alignment=ft.Alignment(0, 0),
             expand=True,
             on_click=close_exit_modal,
@@ -182,7 +183,7 @@ def main(page: ft.Page):
             padding=ft.Padding.symmetric(horizontal=18, vertical=10),
             border_radius=12,
             bgcolor="#FFFFFF" if not cur_colors.is_dark else cur_colors.card_surface,
-            shadow=cur_colors.subtle_shadow(depth=1, blur=3),
+            shadow=cur_colors.subtle_shadow(depth=1, blur=2),
             alignment=ft.Alignment(0, 0),
             expand=True,
             on_click=confirm_exit,
@@ -285,12 +286,12 @@ def main(page: ft.Page):
                 content=ft.Icon(
                     getattr(ft.Icons, icon_name),
                     size=14,
-                    color=colors.accent_primary,
+                    color="#FFFFFF" if (is_active and not colors.is_dark) else colors.accent_primary,
                     opacity=1.0 if is_active else 0.55,
                 ),
                 padding=ft.Padding.symmetric(horizontal=6, vertical=4),
                 border_radius=10,
-                bgcolor=colors.card_surface if is_active else "transparent",
+                bgcolor=colors.accent_primary if (is_active and not colors.is_dark) else (colors.card_surface if is_active else "transparent"),
                 shadow=colors.subtle_shadow(depth=1, blur=3) if is_active else [],
                 on_click=lambda e, v=val: handle_theme_change(v),
             )
@@ -304,11 +305,11 @@ def main(page: ft.Page):
                 ],
                 spacing=2,
             ),
-            bgcolor=colors.pressed_surface,
+            bgcolor="#FFFFFF" if not colors.is_dark else colors.pressed_surface,
             border_radius=14,
             padding=3,
-            shadow=colors.pressed_shadow(),
             border=None,
+            shadow=colors.subtle_shadow(depth=1, blur=2) if not colors.is_dark else colors.pressed_shadow(),
         )
 
         header_row = ft.Row(
@@ -550,7 +551,7 @@ def main(page: ft.Page):
                 width=74,
                 height=44,
                 alignment=ft.Alignment(0, 0),
-                border_radius=15,
+                border_radius=10,
                 bgcolor=bg_color,
                 shadow=shadow,
                 border=None,
@@ -568,7 +569,7 @@ def main(page: ft.Page):
             ),
             bgcolor=colors.card_surface,
             height=54,
-            border_radius=27,
+            border_radius=14,
             padding=ft.Padding.symmetric(horizontal=8, vertical=4),
             shadow=colors.floating_nav_shadow(),
             border=None,
